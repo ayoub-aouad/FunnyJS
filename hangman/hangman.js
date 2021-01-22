@@ -1,7 +1,19 @@
 const hangman = function (word, remainGusses) {
     this.word = word.toLowerCase().split('')
     this.remainGusses = remainGusses
-    this.includeFun = ['c']
+    this.includeFun = []
+    this.status = 'playing'
+}
+
+hangman.prototype.calculatStatus = function(){
+    const letterUnguessed = this.word.every((letters) => this.includeFun.includes(letters))
+    if (this.remainGusses === 0) {
+        this.status = 'failed'
+    } else if (letterUnguessed) {
+        this.status = 'finished'
+    }else {
+        this.status = 'playing'
+    }
 }
 
 hangman.prototype.getPuzzle = function () {
@@ -16,32 +28,34 @@ hangman.prototype.getPuzzle = function () {
     return puzzle
 }
 
+hangman.prototype.getBackStatues = function () {
+    if (this.status === 'playing') {
+        return `You have ${this.remainGusses} left`
+    }else if (this.status === 'failed') {
+        return `Nice try the word was "${this.word.join('')}"`
+    }else {
+        return `Congradulation you guessed the word` 
+    }
+}
+
 hangman.prototype.makeGuess = function (guess) {
     guess = guess.toLowerCase()
     const isUnique = !this.includeFun.includes(guess)
     const isBadGuess = !this.word.includes(guess)
+    if(this.status !== 'playing') {
+        return
+    }
 
     if (isUnique) {
         this.includeFun.push(guess)
     }
 
     if (isUnique && isBadGuess) {
-        this.remainGusses--
+        this.remainGusses--  
     }
+
+    this.calculatStatus()
 }
-
-const puzzleEl = document.querySelector('#puzzle')
-const guessesEl = document.querySelector('guesses')
-// this is a constructor function 
-const word1 = new hangman('ca me fait mal',20)
-const word2 = new hangman('ca va ma belle',30)
-
-window.addEventListener('keypress', function (e) {
-    const guess = String.fromCharCode(e.charCode)
-    word1.makeGuess(guess)
-    puzzleEl.textContent= word1.getPuzzle()
-    guessesEl.textContent= word1.remainGusses
-})
 
 
  
